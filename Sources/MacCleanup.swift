@@ -33,6 +33,13 @@ func size(_ bytes: Int64) -> String {
     @Published var status = "Ready when you are"
     @Published var free: Int64?
     @Published var result: CleanupResult?
+    @Published var reviewFolder: URL?
+    @Published var reviewScan: FileReviewScan?
+    @Published var minimumFileBytes: Int64 = 10_000_000
+    @Published var reviewStatus = "Choose a folder to review personal files."
+    @Published var backup: BackupStatus?
+    @Published var movedFiles: [TrashReceipt] = []
+    var reviewEngine: FileReviewCore?
     let core = CleanupCore()
     var selectedEntries: [CacheScan] { entries.filter { selected.contains($0.id) && $0.blocked == nil } }
     var selectedBytes: Int64 { selectedEntries.reduce(0) { $0 + $1.bytes } }
@@ -78,7 +85,7 @@ func size(_ bytes: Int64) -> String {
     @StateObject private var model = CleanupModel()
     var body: some Scene {
         WindowGroup("Pankaj Mac Cleanup") {
-            CleanupView(model: model).frame(minWidth: 780, minHeight: 680)
+            CleanupRootView(model: model).frame(minWidth: 820, minHeight: 740)
                 .onAppear {
                     NSApp.activate(ignoringOtherApps: true)
                     DispatchQueue.main.async { NSApp.windows.first?.delegate = delegate }
@@ -170,7 +177,7 @@ struct CleanupView: View {
                 }
             }
 
-            Text("Close apps and pause package installs before cleaning. Caches rebuild as you use apps. Photos, documents, downloads, browser logins, system files and Trash are outside this tool’s scope.")
+            Text("Close apps and pause package installs before cleaning. Caches rebuild as you use apps. This tab handles caches only. Use Review files for individual local documents. Browser profiles, system files and emptying Trash stay outside this tool’s scope.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
 
             HStack {

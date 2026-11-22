@@ -3,8 +3,9 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 APP_DIR="$PROJECT_DIR/build/Pankaj Mac Cleanup.app"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
-xcrun swiftc -O -swift-version 5 -parse-as-library \
-  "$PROJECT_DIR/Sources/CleanupCore.swift" "$PROJECT_DIR/Sources/MacCleanup.swift" \
+xcrun swiftc -O -swift-version 5 -parse-as-library -target "$(uname -m)-apple-macosx13.0" \
+  "$PROJECT_DIR/Sources/CleanupCore.swift" "$PROJECT_DIR/Sources/FileReviewCore.swift" \
+  "$PROJECT_DIR/Sources/MacCleanup.swift" "$PROJECT_DIR/Sources/FileReviewUI.swift" \
   -framework SwiftUI -framework AppKit -o "$APP_DIR/Contents/MacOS/MacCleanup"
 cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -15,8 +16,8 @@ cat > "$APP_DIR/Contents/Info.plist" <<'PLIST'
 <key>CFBundleIdentifier</key><string>com.pankajbhadrecha.mac-cleanup</string>
 <key>CFBundleExecutable</key><string>MacCleanup</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>1.0.0</string>
-<key>CFBundleVersion</key><string>1</string>
+<key>CFBundleShortVersionString</key><string>1.1.0</string>
+<key>CFBundleVersion</key><string>2</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
 <key>NSHumanReadableCopyright</key><string>Copyright 2026 Pankaj Bhadrecha. MIT License.</string>
