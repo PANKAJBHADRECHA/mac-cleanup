@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/PANKAJBHADRECHA/mac-cleanup/security/advisories/new
+    about: Use a private report for unintended deletion, path escapes, or exposure of local data.

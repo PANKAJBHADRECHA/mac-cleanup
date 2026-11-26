@@ -1,81 +1,96 @@
 # Pankaj Mac Cleanup
 
-A small native Mac app with two separate workflows: clear a fixed list of rebuildable caches, or review individual local files and move confirmed items to Trash. No AI subscription, web server, third-party runtime, account connection, or background agent is needed.
+**A small native macOS utility for deliberate, manual cleanup.**
 
-## Use it
+Review rebuildable caches, inspect large local files, and decide exactly what to remove. Built with Swift and SwiftUI, using macOS frameworks and command-line utilities—no third-party packages, AI subscription, or background service.
 
-1. Open **Pankaj Mac Cleanup** from your Applications folder or Spotlight.
-2. Select **Quick clean · Caches**, then click **Scan caches**. Scanning does not delete anything.
-3. Close the apps you want to clean and pause package installs. Scan again if an item is blocked.
-4. Select individual caches. Nothing is selected automatically.
-5. Click **Clear selected** and review the confirmation. Clearing permanently deletes those cache folders, bypassing Trash.
-6. Review the result and free-space reading. **Show cleanup history** opens the folder containing your local audit log.
+[![Release](https://img.shields.io/github/v/release/PANKAJBHADRECHA/mac-cleanup)](https://github.com/PANKAJBHADRECHA/mac-cleanup/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black)
 
-Caches rebuild during use, and clearing them can temporarily slow page loading or increase network usage. Keep a current backup of important files. This app only handles its supported cache paths; it does not promise that every byte under macOS “System Data” can be removed.
+[Get started](#getting-started) · [Usage guide](docs/USAGE.md) · [Safety and privacy](docs/SAFETY.md) · [Releases](https://github.com/PANKAJBHADRECHA/mac-cleanup/releases)
 
-## Review documents and downloads
+## Two workflows, explicit choices
 
-1. Select **Review files · Documents**.
-2. Click **Choose folder**. The app checks the latest accessible Time Machine backup. If it cannot verify a backup, or the backup is older than a week, it asks whether to continue. It does not create a backup or change Time Machine settings.
-3. Choose a **local** Documents, Downloads or Desktop folder, or a subfolder inside one. Nothing is scanned outside the chosen folder.
-4. Choose **All sizes**, **10 MB+**, **100 MB+** or **1 GB+**. Results show the largest files first, with size, modified date and full path. **10 MB+** is the default.
-5. Click **Show in Finder**, then press Space to preview a file.
-6. Click that file’s **Move to Trash** button. Review its exact path and confirm. Every file needs its own confirmation; there is no bulk personal-file deletion.
-7. Restore a file with Finder’s **Trash → Put Back** if needed. Moving to Trash does not free space. Empty Trash yourself only when you are sure. The app never empties it.
+### Quick clean
 
-Review scans read metadata, not document contents. Hidden folders, package directories (including app and photo libraries), symbolic links, aliases, iCloud files reported by macOS, and dependency folders such as node_modules are skipped. Third-party sync tools can sync ordinary local folders without an iCloud flag; avoid choosing folders managed by them if you do not want synced changes. iCloud-backed Documents or Desktop may be unavailable; use Finder to manage those files instead.
+Scan a fixed list of cache locations, see their sizes and exact paths, then select what to clear. The app checks for associated running apps and package tools before deletion. Nothing is selected automatically.
 
-Results are limited to the 500 largest matches and scanning stops after 100,000 directory entries. Partial results and unreadable or excluded items are reported. Choose a smaller subfolder for more detail. Files are rechecked for path, cloud status, filesystem identity, size and modification date before moving. A changed or replaced file requires another scan. Recent files are marked for extra care.
+Supported caches: **Chrome, Spotify, Firefox, Comet, pip, npm, Homebrew, Go, node-gyp, and TypeScript**.
 
-macOS may ask for access to the folder you choose. No Screen Recording, Accessibility or administrator permission is required. Review mode handles files only, not whole folders, iPhone backups, Docker images or deleted-app leftovers.
+### Review files
 
-## Scope and protections
+Choose a local folder inside **Documents, Downloads, or Desktop**. Review files largest first, filter by size, check modification dates, and reveal items in Finder. Each file requires its own confirmation before moving to macOS Trash.
 
-- Supported caches: Chrome, Spotify, Firefox, Comet, pip, npm, Homebrew, Go, node-gyp and TypeScript.
-- Exact paths are displayed before cleanup. Browser caches are separate from browser profiles in Application Support.
-- The app skips caches associated with running apps or detected package installs, and checks again immediately before deletion. Package process detection is best effort; pause installs yourself too.
-- Paths must match a built-in allowlist under the current user's home. Symlinks and symlinked parent paths are rejected.
-- Replaced cache directories and substantial growth after scanning require a new scan.
-- No administrator commands, scheduled jobs, login items, network requests, analytics or remote uploads.
-- Personal files are outside the permanent cache-deletion allowlist. Review mode can move individual confirmed files from the chosen local Documents, Downloads or Desktop folder to Trash.
-- Photos libraries, music libraries, offline-download storage, browser profiles, cookies, passwords, history, system files, snapshots, emptying Trash and active AI-runtime/update caches remain outside this tool's cleanup scope.
-- An error can occur partway through filesystem deletion. The result reports such cases as incomplete, and saves outcomes where history is writable.
+The app checks the latest accessible Time Machine backup before folder selection and asks whether to continue if it cannot verify a recent backup.
 
-History is stored locally in `~/Library/Application Support/Pankaj Mac Cleanup/`. `history.jsonl` contains cache events; `files-history.jsonl` records each file moved to Trash, its original and resulting paths, size and timestamp. Cache history is not an inventory of individual deleted cache files. Logs are never uploaded. The file-review view reports items moved during the current app session; history retains previous sessions. Free-space changes can differ from measured cache sizes because other apps, APFS and macOS also change storage. Trash moves are not counted as space reclaimed.
+> **Deletion behavior:** Cache cleanup permanently removes selected cache folders. File review moves individually confirmed files to Trash. Moving files to Trash does not reclaim space until you empty it yourself. This app never empties Trash.
 
-## Build from source
+## Getting started
 
-Requires macOS 13 or later and Apple's Command Line Tools (Swift compiler). The compiler is needed only to build, not to run the resulting app. No package downloads are used by these scripts.
-
-For an easy rebuild and install, double-click **Install.command** in Finder. It runs the safety tests, builds, installs into your user Applications folder, and opens the app without cleaning anything. Installing Apple's compiler on a Mac that does not already have it can use several GB; the compiled app itself is small.
+**Requirements:** macOS 13 or later. Building requires Apple's Command Line Tools, including Swift. The compiled app requires no separate runtime installation.
 
 ```sh
+git clone https://github.com/PANKAJBHADRECHA/mac-cleanup.git
+cd mac-cleanup
 bash scripts/test.sh
 bash scripts/build.sh
 open "build/Pankaj Mac Cleanup.app"
 ```
 
-To install for your user account:
+To install into your user Applications folder, quit any running copy and run:
 
 ```sh
-mkdir -p "$HOME/Applications"
-ditto "build/Pankaj Mac Cleanup.app" "$HOME/Applications/Pankaj Mac Cleanup.app"
-xattr -cr "$HOME/Applications/Pankaj Mac Cleanup.app"
-codesign --verify --deep --strict "$HOME/Applications/Pankaj Mac Cleanup.app"
+bash Install.command
 ```
 
-The build is ad-hoc signed locally; it is not Apple Developer ID signed or notarized. A downloaded build may trigger Gatekeeper. Build locally from source rather than disabling macOS security settings. Binary builds are ignored by Git. Source and any release artifacts contain no personal cleanup records.
+The installer tests, builds, copies, and opens the app. **It does not perform a cleanup.** If Apple's Command Line Tools are missing, it prints installation guidance rather than downloading them automatically.
 
-For a read-only diagnostic scan in Terminal, run `bash scripts/test.sh --scan-only`. Normal safety tests use temporary fixtures; this optional scan measures the actual current user's supported caches without deleting them.
+Prebuilt **Apple Silicon** downloads are available in [Releases](https://github.com/PANKAJBHADRECHA/mac-cleanup/releases/latest). Builds are ad-hoc signed, **not Developer ID signed or notarized**. A downloaded build may be blocked by Gatekeeper; building locally is the documented path. Do not disable macOS security protections to run it. Intel source builds are intended to work but have not been validated on Intel hardware.
 
-## Remove it
+The installed v1.1 app measured approximately **780 KiB** on the development Mac. Compiler tools and build caches are separate and can be much larger; no storage savings are guaranteed.
 
-Move **Pankaj Mac Cleanup.app** to Trash. Optionally remove its history folder using Finder. It installs no background service.
+## Designed for review before removal
 
-## Inspiration
+- **Bounded scope:** Cache deletion uses a built-in path allowlist; file review stays within the folder you choose.
+- **Fresh checks:** Paths and file identity are rechecked before removal. Changed files or substantially grown caches require another scan.
+- **Protected locations:** System files, snapshots, browser profiles, Photos libraries, and iCloud locations reported by macOS are excluded from cleanup.
+- **Manual operation:** No scheduled tasks, login items, administrator commands, or silent cleanup.
+- **Local history:** Cleanup outcomes remain on the Mac. The app makes no network requests and uploads no logs.
 
-Inspired by [Kunwar1417/mac-cleanup](https://github.com/Kunwar1417/mac-cleanup), which supplies instructions for an AI cleanup assistant and a demonstration website. This is an independently implemented native app; no upstream source or instruction text is bundled. It implements a narrower set of deterministic actions: cache cleanup and individually confirmed local-file moves to Trash.
+Filesystem checks reduce risk but cannot eliminate concurrent changes. Process detection is best effort. Close relevant apps, pause installs, keep a backup, and review the displayed paths. See [Safety and privacy](docs/SAFETY.md) for the exact boundaries and limitations.
+
+## Development
+
+The project uses direct `swiftc` builds and two standalone test executables; no package manager is required.
+
+```sh
+# Run both suites using disposable temporary fixtures
+bash scripts/test.sh
+
+# Build and ad-hoc sign the app bundle
+bash scripts/build.sh
+
+# Optional: inspect actual supported caches without deleting anything
+bash scripts/test.sh --scan-only
+```
+
+The suites contain **40 checks** covering cache allowlists, symlinks, running processes, stale file snapshots, folder boundaries, file filters, Trash behavior, and backup warnings. Tests simulate document moves in a temporary directory; they do not move personal files into the real Trash. A [macOS CI template](docs/ci/macos.yml) is included; automated checks are not enabled yet. Native dialogs and real Trash integration still require manual verification.
+
+### Source layout
+
+- [`Sources/CleanupCore.swift`](Sources/CleanupCore.swift) — cache scanning, validation, cleanup, and audit history.
+- [`Sources/FileReviewCore.swift`](Sources/FileReviewCore.swift) — local file review, Trash moves, and backup checks.
+- [`Sources/MacCleanup.swift`](Sources/MacCleanup.swift) and [`Sources/FileReviewUI.swift`](Sources/FileReviewUI.swift) — SwiftUI screens and app lifecycle.
+- [`Tests/`](Tests/) — disposable filesystem fixtures and safety checks.
+- [`scripts/`](scripts/) — build and test entry points.
+
+See [Contributing](CONTRIBUTING.md) for development expectations and [Changelog](CHANGELOG.md) for release history. For security issues, use the private reporting route in [SECURITY.md](SECURITY.md).
+
+## Acknowledgements
+
+Inspired by [Kunwar1417/mac-cleanup](https://github.com/Kunwar1417/mac-cleanup), an instruction-based AI cleanup assistant. This project is an independent native implementation with a narrower scope: selected cache cleanup and individually confirmed local-file moves to Trash. No upstream code or instruction text is bundled.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+[MIT](LICENSE) · Copyright © 2026 Pankaj Bhadrecha.

@@ -1,0 +1,37 @@
+name: macOS checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test and build
+    runs-on: macos-14
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Show compiler version
+        run: xcrun swiftc --version
+      - name: Run fixture-based safety checks
+        run: bash scripts/test.sh
+      - name: Build app
+        run: bash scripts/build.sh
+      - name: Verify bundle and signature
+        run: |
+          plutil -lint "build/Pankaj Mac Cleanup.app/Contents/Info.plist"
+          codesign --verify --deep --strict "build/Pankaj Mac Cleanup.app"
+      - name: Check whitespace
+        run: git diff --check

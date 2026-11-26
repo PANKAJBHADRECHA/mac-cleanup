@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible problem using non-sensitive examples.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For unintended deletion, path escapes, or private-data exposure, use the private security report linked in SECURITY.md.
+        Do not attach personal cleanup logs, filenames, credentials, or unredacted screenshots.
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: "For example: 1.1.0, or a source commit"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: macOS version and processor
+      placeholder: "For example: macOS 15, Apple Silicon"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Use disposable temporary files for filesystem examples.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed behavior
+      description: Include the error text with private paths redacted.
+    validations:
+      required: true
